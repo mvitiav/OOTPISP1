@@ -12,6 +12,7 @@ import java.util.Arrays;
 
 
 public class myPanel {
+    private static String stringOwner="";
 
     public static Object currentEditable;
 
@@ -29,7 +30,7 @@ public class myPanel {
         }
         if ((clazz==String.class))
         {
-            return "sample_text";
+            return stringOwner;
         }
 
         Constructor constructor=null;
@@ -45,6 +46,7 @@ public class myPanel {
 
         for(int i=0;i<types.length;i++)
         {
+            stringOwner=clazz.getName();
             zeroes[i]=createObject(types[i]);
         }
 

@@ -25,8 +25,16 @@ public class Form extends JFrame {
 
     public Form(int width, int height) throws HeadlessException {
 
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+
+        } catch (ClassNotFoundException | InstantiationException | UnsupportedLookAndFeelException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+
         add(panel1);
-        setTitle("CRD");
+        setTitle("CRUD");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setSize(width, height);
