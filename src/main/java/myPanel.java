@@ -14,21 +14,8 @@ import java.util.Arrays;
 public class myPanel {
 
     public static Object currentEditable;
-//    public myPanel() {
-//        setLayout(new java.awt.GridLayout(4, 4));
-//        for (int i = 0; i < 16; ++i) {
-//            JButton b = new JButton(String.valueOf(i));
-//            b.addActionListener(new java.awt.event.ActionListener() {
-//                public void actionPerformed(java.awt.event.ActionEvent e) {
-//                    //...
-//                }
-//            });
-//            add(b);
-//        }
-//    }
 
-    public static Object createObject(Class clazz) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-
+    public static Object createObject(Class clazz) throws InvocationTargetException, InstantiationException, IllegalAccessException {
 
         Object object =null;
 

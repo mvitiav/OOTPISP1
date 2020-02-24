@@ -7,10 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-
-import java.lang.reflect.*;
-
 
 
 public class Form extends JFrame {
@@ -32,10 +31,10 @@ public class Form extends JFrame {
         setLocationRelativeTo(null);
         setSize(width, height);
         setVisible(true);
-        arrayList.add(new Structure(new Point(0,0),"structure1"));
-        arrayList.add(new Office(new Point(20,0),"office1",3,500));
-        arrayList.add(new Streetlight(new Point(4,-50),"Streetlight1",false,20));
-        arrayList.add(new Cottage(new Point(24,-530),"Cottage1",5,20,4,new Garage(new Point(24,-530),"Garage1",5,20)));
+        arrayList.add(new Structure(new Point(0, 0), "structure1"));
+        arrayList.add(new Office(new Point(20, 0), "office1", 3, 500));
+        arrayList.add(new Streetlight(new Point(4, -50), "Streetlight1", false, 20));
+        arrayList.add(new Cottage(new Point(24, -530), "Cottage1", 5, 20, 4, new Garage(new Point(24, -530), "Garage1", 5, 20)));
 
         objectList.setModel(new ListModel() {
             @Override
@@ -57,142 +56,96 @@ public class Form extends JFrame {
             }
         });
 
+
         objectList.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e)
-            {
-               // System.out.println("clicked!");
-                //rightPanel=myPanel.generatePanel( arrayList.get(objectList.getSelectedIndex()));
-              //  rightPanel.add(new JLabel("12123"));
-
-
-                myPanel.currentEditable=arrayList.get(objectList.getSelectedIndex());
-
-
-
-              repaintRight();
-
-
+            public void mouseClicked(MouseEvent e) {
+                myPanel.currentEditable = arrayList.get(objectList.getSelectedIndex());
+                repaintRight();
 
             }
         });
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                arrayList.remove(objectList.getSelectedIndex());
+                if (!objectList.isSelectionEmpty()) {
+                    arrayList.remove(objectList.getSelectedIndex());
 
-                repaint();
-                objectList.clearSelection();
+                    repaint();
+                    objectList.clearSelection();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Nothing to delete!");
+                }
             }
         });
         updateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               Object object= myPanel.currentEditable;
-                Field[] fields =   myPanel.getAllFields(object);
+                Object object = myPanel.currentEditable;
+                Field[] fields = myPanel.getAllFields(object);
 //                Field[] fields = object.getClass().getDeclaredFields();
-                int i=0;
-                Component[] components = ((JPanel)rightPanel.getComponent(0)).getComponents();
-                for(Field field:fields){
+                int i = 0;
+                Component[] components = ((JPanel) rightPanel.getComponent(0)).getComponents();
+                for (Field field : fields) {
                     field.setAccessible(true);
                     try {
-                                if( myPanel.StringToObj(field.getType(),components[i+1])!=null){
-                        field.set(
-                                object,
-                                myPanel.StringToObj(field.getType(),components[i+1])
-                        );}
+                        if (myPanel.StringToObj(field.getType(), components[i + 1]) != null) {
+                            field.set(
+                                    object,
+                                    myPanel.StringToObj(field.getType(), components[i + 1])
+                            );
+                        }
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                     }
-                    i+=2;
+                     catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null,"NUMBER FORMAT EXCEPTION!");
+//                    ex.printStackTrace();
                 }
+                    i += 2;
+                }
+                objectList.updateUI();
+                objectList.revalidate();
+                objectList.repaint();
             }
+
+
         });
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-              String s =  JOptionPane.showInputDialog("Enter classname");
-//                try {
-//
-////                 Class.forName(s).getConstructor();
-//                } catch (ClassNotFoundException ex) {
-//                    ex.printStackTrace();
-//                }
+                String s = JOptionPane.showInputDialog("Enter classname");
+
                 try {
-
-
-                    Class clazz = Class.forName("myArchitecture."+s);
-                    //Object object = clazz.newInstance();
-
-                 //  Object object =clazz.getConstructor(clazz.getTypeParameters());
-                  //  arrayList.add(object);
-
-
-
-
-
-
-
-
-         //           jop.add(jcb);
-//                    JDialog diag = new JDialog();
-//                    diag.getContentPane().add(jop);
-//                    diag.pack();
-//                    diag.setVisible(true);
-
-
-
-//
-//                    Object[] zeroes = new Object[constructor.getParameterCount()];
-//                    System.out.println();
-//
-//                    //Object object = constructor.newInstance(zeroes);
-//                    String name =  JOptionPane.showInputDialog("Enter name of object");
-//
-//
-//                    Object[] zeroes2 = new Object[constructor.getParameterCount()];
-//                    zeroes2[0]=new Point(0,0);
-//                    zeroes2[1]=name;
-//                    Object object = constructor.newInstance(new Point(0,0),"petya");
-
-
-
-
+                    Class clazz = Class.forName("myArchitecture." + s);
                     Object object = myPanel.createObject(clazz);
 
                     arrayList.add(object);
-
                     objectList.updateUI();
                     objectList.revalidate();
                     objectList.repaint();
-                 objectList.repaint();
-                 objectList.revalidate();
+
 
                 } catch (ClassNotFoundException ex) {
-                    ex.printStackTrace();
-                } catch (IllegalAccessException ex) {
-                    ex.printStackTrace();
-                } catch (InstantiationException ex) {
-                    ex.printStackTrace();
-                } catch (InvocationTargetException ex) {
-                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null,"Class not found!");
+//                    ex.printStackTrace();
+
+                } catch (IllegalAccessException| InstantiationException | InvocationTargetException ex) {
+                    JOptionPane.showMessageDialog(null,"Constructor exception!");
+//                    ex.printStackTrace();
                 }
             }
         });
     }
 
-    public void repaintRight()
+    public void repaintRight() {
+        this.setTitle(myPanel.currentEditable.toString()+" ("+String.valueOf(myPanel.currentEditable.getClass())+")");
 
-        {
-            this.setTitle(String.valueOf(myPanel.currentEditable.getClass()));
+        rightPanel.removeAll();
+        rightPanel.setBackground(Color.red); //means bad situations
+        rightPanel.add(myPanel.generatePanel(myPanel.currentEditable));
+        rightPanel.repaint();
+        rightPanel.revalidate();
 
-            rightPanel.removeAll();
-            rightPanel.setBackground(Color.red);
-            rightPanel.add(myPanel.generatePanel( myPanel.currentEditable));
-            rightPanel.repaint();
-            rightPanel.revalidate();
-        }
-
-    private void createUIComponents() {
-        // TODO: place custom component creation code here
     }
+
 }
