@@ -7,6 +7,7 @@ public class Structure {
     private int coordinatey;
     public String name;
 
+
     public Point getCoordinates() {
         return new Point(coordinatex, coordinatey);
     }

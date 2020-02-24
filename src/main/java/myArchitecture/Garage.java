@@ -14,6 +14,7 @@ public class Garage extends Building{
 
     public int getMaxCars() {
         return maxCars;
+
     }
 
     public void setMaxCars(int maxCars) {

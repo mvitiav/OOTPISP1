@@ -1,3 +1,5 @@
+import myArchitecture.Garage;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -79,7 +81,7 @@ public class myPanel {
     public static Object StringToObj(Class clazz, Component component)
     {
         if (clazz==Boolean.class){return ((JCheckBox)component).isSelected();}
-        if (clazz.isAssignableFrom(Enum.class)||(clazz==Enum.class)){return ((JComboBox)component).getSelectedIndex();}
+        if (clazz instanceof Class && ((Class<?>)clazz).isEnum()){return ((JComboBox)component).getSelectedIndex();}
         if ((clazz==Integer.class)||(clazz==int.class)){return Integer.parseInt(((JTextArea)component).getText());}
         if (clazz==Double.class){return Double.parseDouble(((JTextArea)component).getText());}
          if(clazz==String.class)  { return ((JTextArea)component).getText();}
@@ -100,12 +102,12 @@ public class myPanel {
                     jCheckBox.setSelected((Boolean)field.get(object));
                     panel.add(jCheckBox);
                 }else
-//                if (field.getType().isAssignableFrom(Enum.class)||(clazz==Enum.class)){
+//                if (field.getType() instanceof Class && ((Class<?>)field.getType()).isEnum()){
 //               //  JComboBox jComboBox = new JComboBox( ((Enum)field.get(object)));
 //
-//
-//                    JComboBox jComboBox = new JComboBox
+//                    JComboBox jComboBox = new JComboBox(getEnumValues());
 //                   // ((Enum)field.get(object)).to
+//                    panel.add(jComboBox);
 //                }
 
                 if ((field.getType()==String.class)||(field.getType()==Double.class) ||(field.getType()==Integer.class) ||(field.getType()==int.class) )  {  panel.add(new JTextArea(String.valueOf(field.get(object))));}
