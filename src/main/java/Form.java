@@ -1,5 +1,3 @@
-package Form;
-
 import myArchitecture.*;
 
 import javax.swing.*;
@@ -13,6 +11,8 @@ import java.util.ArrayList;
 
 import java.lang.reflect.*;
 
+
+
 public class Form extends JFrame {
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
@@ -25,6 +25,7 @@ public class Form extends JFrame {
 
 
     public Form(int width, int height) throws HeadlessException {
+
         add(panel1);
         setTitle("CRD");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -59,17 +60,16 @@ public class Form extends JFrame {
         objectList.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e)
             {
-                System.out.println("clicked!");
+               // System.out.println("clicked!");
                 //rightPanel=myPanel.generatePanel( arrayList.get(objectList.getSelectedIndex()));
               //  rightPanel.add(new JLabel("12123"));
-                rightPanel.removeAll();
-                rightPanel.setBackground(Color.red);
-
-                    rightPanel.add(myPanel.generatePanel( arrayList.get(objectList.getSelectedIndex())));
 
 
-                rightPanel.repaint();
-                rightPanel.revalidate();
+                myPanel.currentEditable=arrayList.get(objectList.getSelectedIndex());
+
+
+
+              repaintRight();
 
 
 
@@ -87,7 +87,7 @@ public class Form extends JFrame {
         updateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-               Object object= arrayList.get(objectList.getSelectedIndex());
+               Object object= myPanel.currentEditable;
                 Field[] fields =   myPanel.getAllFields(object);
 //                Field[] fields = object.getClass().getDeclaredFields();
                 int i=0;
@@ -95,11 +95,11 @@ public class Form extends JFrame {
                 for(Field field:fields){
                     field.setAccessible(true);
                     try {
-
+                                if( myPanel.StringToObj(field.getType(),components[i+1])!=null){
                         field.set(
                                 object,
                                 myPanel.StringToObj(field.getType(),components[i+1])
-                        );
+                        );}
                     } catch (IllegalAccessException ex) {
                         ex.printStackTrace();
                     }
@@ -107,7 +107,90 @@ public class Form extends JFrame {
                 }
             }
         });
+        createButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+              String s =  JOptionPane.showInputDialog("Enter classname");
+//                try {
+//
+////                 Class.forName(s).getConstructor();
+//                } catch (ClassNotFoundException ex) {
+//                    ex.printStackTrace();
+//                }
+                try {
+
+
+                    Class clazz = Class.forName("myArchitecture."+s);
+                    //Object object = clazz.newInstance();
+
+                 //  Object object =clazz.getConstructor(clazz.getTypeParameters());
+                  //  arrayList.add(object);
+
+
+
+
+
+
+
+
+         //           jop.add(jcb);
+//                    JDialog diag = new JDialog();
+//                    diag.getContentPane().add(jop);
+//                    diag.pack();
+//                    diag.setVisible(true);
+
+
+
+//
+//                    Object[] zeroes = new Object[constructor.getParameterCount()];
+//                    System.out.println();
+//
+//                    //Object object = constructor.newInstance(zeroes);
+//                    String name =  JOptionPane.showInputDialog("Enter name of object");
+//
+//
+//                    Object[] zeroes2 = new Object[constructor.getParameterCount()];
+//                    zeroes2[0]=new Point(0,0);
+//                    zeroes2[1]=name;
+//                    Object object = constructor.newInstance(new Point(0,0),"petya");
+
+
+
+
+                    Object object = myPanel.createObject(clazz);
+
+                    arrayList.add(object);
+
+                    objectList.updateUI();
+                    objectList.revalidate();
+                    objectList.repaint();
+                 objectList.repaint();
+                 objectList.revalidate();
+
+                } catch (ClassNotFoundException ex) {
+                    ex.printStackTrace();
+                } catch (IllegalAccessException ex) {
+                    ex.printStackTrace();
+                } catch (InstantiationException ex) {
+                    ex.printStackTrace();
+                } catch (InvocationTargetException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
+
+    public void repaintRight()
+
+        {
+            this.setTitle(String.valueOf(myPanel.currentEditable.getClass()));
+
+            rightPanel.removeAll();
+            rightPanel.setBackground(Color.red);
+            rightPanel.add(myPanel.generatePanel( myPanel.currentEditable));
+            rightPanel.repaint();
+            rightPanel.revalidate();
+        }
 
     private void createUIComponents() {
         // TODO: place custom component creation code here
