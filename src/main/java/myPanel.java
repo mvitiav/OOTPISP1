@@ -20,7 +20,7 @@ public class myPanel {
 
         Object object =null;
 
-        if ((clazz==Integer.class)||(clazz==int.class)||(clazz==double.class)||(clazz==float.class))
+        if ((clazz==Integer.class)||(clazz==Byte.class)||(clazz==byte.class)||(clazz==Integer.class)||(clazz==int.class)||(clazz==Double.class)||(clazz==double.class)||(clazz==float.class)||(clazz==char.class))
         {
             return 0;
         }
@@ -32,6 +32,7 @@ public class myPanel {
         {
             return stringOwner;
         }
+
 
         Constructor constructor=null;
         if(clazz.getConstructors().length>1){
@@ -57,6 +58,10 @@ public class myPanel {
     public static  Field[] getAllFields(Object object)
 
     {
+
+
+
+
         ArrayList<Field> fields = new ArrayList<Field>();
         Class clazz =object.getClass();
         while (clazz != Object.class) {
@@ -65,6 +70,8 @@ public class myPanel {
         }
         return ( Field[])fields.toArray(new Field[fields.size()]);
 
+
+
     }
 
     public static Object StringToObj(Class clazz, Component component)
@@ -72,7 +79,7 @@ public class myPanel {
         if (clazz==Boolean.class){return ((JCheckBox)component).isSelected();}
         if (clazz instanceof Class && ((Class<?>)clazz).isEnum()){return ((JComboBox)component).getSelectedIndex();}
         if ((clazz==Integer.class)||(clazz==int.class)){return Integer.parseInt(((JTextArea)component).getText());}
-        if (clazz==Double.class){return Double.parseDouble(((JTextArea)component).getText());}
+        if ((clazz==double.class)||(clazz==Double.class)){return Double.parseDouble(((JTextArea)component).getText());}
          if(clazz==String.class)  { return ((JTextArea)component).getText();}
          return null;
     }
@@ -91,15 +98,16 @@ public class myPanel {
                     jCheckBox.setSelected((Boolean)field.get(object));
                     panel.add(jCheckBox);
                 }else
+
 //                if (field.getType() instanceof Class && ((Class<?>)field.getType()).isEnum()){
 //               //  JComboBox jComboBox = new JComboBox( ((Enum)field.get(object)));
 //
-//                    JComboBox jComboBox = new JComboBox(getEnumValues());
+//                    JComboBox jComboBox = new JComboBox();
 //                   // ((Enum)field.get(object)).to
 //                    panel.add(jComboBox);
 //                }
 
-                if ((field.getType()==String.class)||(field.getType()==Double.class) ||(field.getType()==Integer.class) ||(field.getType()==int.class) )  {  panel.add(new JTextArea(String.valueOf(field.get(object))));}
+                if ((field.getType()==String.class)||(field.getType()==Double.class)||(field.getType()==double.class)||(field.getType()==Integer.class) ||(field.getType()==int.class) )  {  panel.add(new JTextArea(String.valueOf(field.get(object))));}
                 else
                 {
                     JButton jButton = new JButton(String.valueOf(field.get(object)));

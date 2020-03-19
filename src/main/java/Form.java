@@ -1,18 +1,26 @@
+import Serializers.Serializer;
+import Serializers.myXMLser;
 import myArchitecture.*;
 
 import javax.swing.*;
 import javax.swing.event.ListDataListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.ServiceLoader;
 
 
 public class Form extends JFrame {
+    public static ArrayList<Serializer> serializers = new ArrayList<>();
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
     private JList objectList;
@@ -20,10 +28,14 @@ public class Form extends JFrame {
     private JButton updateButton;
     private JButton deleteButton;
     private JPanel rightPanel;
+    private JButton serielizeButton;
+    private JButton deserializeButton;
     private ArrayList arrayList = new ArrayList();
 
 
     public Form(int width, int height) throws HeadlessException {
+
+
 
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
@@ -39,6 +51,19 @@ public class Form extends JFrame {
         setLocationRelativeTo(null);
         setSize(width, height);
         setVisible(true);
+
+//        objectList.addListSelectionListener((new ListSelectionListener() {
+//            @Override
+//            public void valueChanged(ListSelectionEvent e) {
+//
+////                myPanel.currentEditable = arrayList.get(e.getFirstIndex());
+//                myPanel.currentEditable = objectList.getSelectedValue();
+//
+//                repaintRight();
+//            }
+//        })
+//       );
+
         arrayList.add(new Structure(new Point(0, 0), "structure1"));
         arrayList.add(new Office(new Point(20, 0), "office1", 3, 500));
         arrayList.add(new Streetlight(new Point(4, -50), "Streetlight1", false, 20));
@@ -72,6 +97,7 @@ public class Form extends JFrame {
 
             }
         });
+
         deleteButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -124,6 +150,7 @@ public class Form extends JFrame {
                 String s = JOptionPane.showInputDialog("Enter classname");
 
                 try {
+
                     Class clazz = Class.forName("myArchitecture." + s);
                     Object object = myPanel.createObject(clazz);
 
@@ -143,6 +170,85 @@ public class Form extends JFrame {
                 }
             }
         });
+        serielizeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+              //TODO: CHANGE!!!!
+
+            //JComboBox jcd = new JComboBox(date);
+                //     JOptionPane.showMessageDialog();
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                JComboBox jcd = new JComboBox(getSerializers().toArray());
+                if(0==JOptionPane.showConfirmDialog( null, jcd, "Date" ,JOptionPane.YES_OPTION))
+                try {
+
+                    FileNameExtensionFilter filter = ((Serializer)jcd.getSelectedItem()).getFilter();
+                    // add filters
+                    chooser.addChoosableFileFilter(filter);
+                    chooser.setFileFilter(filter);
+
+
+                    if (chooser.showSaveDialog(null) == chooser.APPROVE_OPTION) {
+                        ((Serializer)jcd.getSelectedItem()).serialize(arrayList,chooser.getSelectedFile().getAbsolutePath());
+                    }
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+        deserializeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+
+
+//
+//
+//                JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
+//
+//
+//                int returnValue = jfc.showOpenDialog(null);
+//                if (returnValue == JFileChooser.APPROVE_OPTION) {
+//
+//
+//                    try {
+//                        arrayList = (ArrayList) new myXMLser().deSerialize(jfc.getSelectedFile().getAbsolutePath());
+//                    } catch (FileNotFoundException e) {
+//                        e.printStackTrace();
+//                    }
+//                    repaint();
+//                    objectList.clearSelection();
+//                }
+
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                JComboBox jcd = new JComboBox(getSerializers().toArray());
+                if(0==JOptionPane.showConfirmDialog( null, jcd, "Date" ,JOptionPane.YES_OPTION))
+                    try {
+
+                        FileNameExtensionFilter filter = ((Serializer)jcd.getSelectedItem()).getFilter();
+                        // add filters
+                        chooser.addChoosableFileFilter(filter);
+                        chooser.setFileFilter(filter);
+
+
+                        if (chooser.showOpenDialog(null) == chooser.APPROVE_OPTION) {
+                            arrayList = (ArrayList) ((Serializer)jcd.getSelectedItem()).deSerialize(chooser.getSelectedFile().getAbsolutePath());
+                            repaint();
+                      objectList.clearSelection();
+                        }
+
+
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+
+            }
+        });
     }
 
     public void repaintRight() {
@@ -155,5 +261,10 @@ public class Form extends JFrame {
         rightPanel.revalidate();
 
     }
-
+    public static ArrayList<Serializer> getSerializers()
+        {ArrayList<Serializer> serializers = new ArrayList<>();
+            ServiceLoader<Serializer> loader = ServiceLoader.load(Serializer.class);
+            for (Serializer s :loader ) { serializers.add(s); }
+        return  serializers;
+        }
 }
