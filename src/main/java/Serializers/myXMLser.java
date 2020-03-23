@@ -29,11 +29,16 @@ public class myXMLser implements Serializer {
     }
 
     @Override
+    public String toString() {
+        return "myXMLser{}";
+    }
+
+    @Override
     public Object deSerialize(String pathname) throws FileNotFoundException {
         XMLDecoder decoder=null;
 
             decoder=new XMLDecoder(new BufferedInputStream(new FileInputStream(pathname)));
 
-        return (Object) decoder.readObject();
+        return decoder.readObject();
     }
 }

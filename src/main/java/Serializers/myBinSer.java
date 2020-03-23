@@ -26,6 +26,11 @@ public class myBinSer implements Serializer {
     }
 
     @Override
+    public String toString() {
+        return "myBinSer{}";
+    }
+
+    @Override
     public Object deSerialize(String pathname) throws IOException, ClassNotFoundException {
         Object retObject = null;
 

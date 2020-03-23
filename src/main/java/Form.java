@@ -1,17 +1,11 @@
 import Serializers.Serializer;
-import Serializers.myXMLser;
 import myArchitecture.*;
-
 import javax.swing.*;
 import javax.swing.event.ListDataListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.FileNotFoundException;
+import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +14,79 @@ import java.util.ServiceLoader;
 
 
 public class Form extends JFrame {
+
+    private class SerializerWrapper implements Serializer{
+        private Serializer wrappable;
+        public SerializerWrapper(Serializer serializer) {
+            this.wrappable = serializer;
+        }
+
+        @Override
+        public String getName() {
+            return wrappable.getName();
+        }
+
+        @Override
+        public FileNameExtensionFilter getFilter() {
+            return wrappable.getFilter();
+        }
+
+        @Override
+        public boolean serialize(Object object, String pathname) throws IOException {
+            return wrappable.serialize(object,pathname);
+        }
+
+        @Override
+        public Object deSerialize(String pathname) throws IOException, ClassNotFoundException {
+            return wrappable.deSerialize(pathname);
+        }
+
+        @Override
+        public String toString() {
+           return wrappable.getName();
+        }
+    }
+
+    private class EncoderWrapper implements PlugTest
+    {
+        PlugTest wrapper;
+
+        public EncoderWrapper(PlugTest wrappable) {
+            this.wrapper=wrappable;
+
+        }
+
+        @Override
+        public boolean checkFile(File src) {
+            return wrapper.checkFile(src);
+        }
+
+        @Override
+        public String getName() {
+            return wrapper.getName();
+        }
+
+        @Override
+        public String getExt() {
+            return wrapper.getExt();
+        }
+
+        @Override
+        public int encode(File dst, File src, String[] args) throws IOException {
+            return wrapper.encode(dst,src,args);
+        }
+
+        @Override
+        public int decode(File dst, File src, String[] args) throws IOException {
+            return wrapper.decode(dst,src,args);
+        }
+
+        @Override
+        public String toString() {
+            return  wrapper.getName();
+        }
+    }
+
     public static ArrayList<Serializer> serializers = new ArrayList<>();
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
@@ -32,8 +99,14 @@ public class Form extends JFrame {
     private JButton deserializeButton;
     private ArrayList arrayList = new ArrayList();
 
+    private ArrayList<PlugTest> plugTests = new ArrayList<PlugTest>();
+
 
     public Form(int width, int height) throws HeadlessException {
+
+
+        plugTests.add(new myDefaultenc());
+        Main.plugins.forEach(o -> plugTests.add(o));
 
 
 
@@ -111,6 +184,7 @@ public class Form extends JFrame {
                 }
             }
         });
+
         updateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -147,39 +221,21 @@ public class Form extends JFrame {
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String s = JOptionPane.showInputDialog("Enter classname");
-
-                try {
-
-                    Class clazz = Class.forName("myArchitecture." + s);
-                    Object object = myPanel.createObject(clazz);
-
-                    arrayList.add(object);
-                    objectList.updateUI();
-                    objectList.revalidate();
-                    objectList.repaint();
-
-
-                } catch (ClassNotFoundException ex) {
-                    JOptionPane.showMessageDialog(null,"Class not found!");
-//                    ex.printStackTrace();
-
-                } catch (IllegalAccessException| InstantiationException | InvocationTargetException ex) {
-                    JOptionPane.showMessageDialog(null,"Constructor exception!");
-//                    ex.printStackTrace();
-                }
+                create();
             }
         });
         serielizeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-              //TODO: CHANGE!!!!
+              //TODO: CHANGE! <-changed
 
             //JComboBox jcd = new JComboBox(date);
                 //     JOptionPane.showMessageDialog();
                 JFileChooser chooser = new JFileChooser();
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                JComboBox jcd = new JComboBox(getSerializers().toArray());
+                ArrayList<SerializerWrapper> serializerWrappers = new ArrayList<>();
+                getSerializers().forEach(o->serializerWrappers.add(new SerializerWrapper(o)));
+                JComboBox jcd = new JComboBox(serializerWrappers.toArray());
                 if(0==JOptionPane.showConfirmDialog( null, jcd, "Date" ,JOptionPane.YES_OPTION))
                 try {
 
@@ -189,8 +245,26 @@ public class Form extends JFrame {
                     chooser.setFileFilter(filter);
 
 
-                    if (chooser.showSaveDialog(null) == chooser.APPROVE_OPTION) {
-                        ((Serializer)jcd.getSelectedItem()).serialize(arrayList,chooser.getSelectedFile().getAbsolutePath());
+                    if (chooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+                        File tmp = new File("temp.tmp");
+                        ((Serializer)jcd.getSelectedItem()).serialize(arrayList,tmp.getPath());
+                        PlugTest pt=null;
+
+                        ArrayList<EncoderWrapper> encoderWrappers = new ArrayList<>();
+                        plugTests.forEach(o->encoderWrappers.add(new EncoderWrapper(o)));
+                        JComboBox jcd2 = new JComboBox(encoderWrappers.toArray());
+                        if(0==JOptionPane.showConfirmDialog( null, jcd2, "Date" ,JOptionPane.YES_OPTION))
+                        {
+                            pt= (PlugTest) jcd2.getSelectedItem();
+
+//                       PlugTest pt =  new toDelete.myZBase32enc();
+
+
+                       //+"."+pt.geExt()
+                        pt.encode(new File(chooser.getSelectedFile().getAbsolutePath()),tmp,null);
+
+                        }
+                        tmp.deleteOnExit();
                     }
 
 
@@ -225,7 +299,9 @@ public class Form extends JFrame {
 
                 JFileChooser chooser = new JFileChooser();
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                JComboBox jcd = new JComboBox(getSerializers().toArray());
+                ArrayList<SerializerWrapper> serializerWrappers = new ArrayList<>();
+                getSerializers().forEach(o->serializerWrappers.add(new SerializerWrapper(o)));
+                JComboBox jcd = new JComboBox(serializerWrappers.toArray());
                 if(0==JOptionPane.showConfirmDialog( null, jcd, "Date" ,JOptionPane.YES_OPTION))
                     try {
 
@@ -235,14 +311,44 @@ public class Form extends JFrame {
                         chooser.setFileFilter(filter);
 
 
-                        if (chooser.showOpenDialog(null) == chooser.APPROVE_OPTION) {
-                            arrayList = (ArrayList) ((Serializer)jcd.getSelectedItem()).deSerialize(chooser.getSelectedFile().getAbsolutePath());
-                            repaint();
-                      objectList.clearSelection();
+                        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+                            PlugTest pt=null;
+                            File tmp = new File("temp.tmp");
+                           // System.out.println(pt.checkFile(new File(chooser.getSelectedFile().getAbsolutePath())));
+                           // System.out.println(new toDelete.myBase64enc().checkFile(new File(chooser.getSelectedFile().getAbsolutePath())));
+
+                            boolean found=false;
+                            for (PlugTest plugTest : plugTests) {
+                                if (plugTest.checkFile(new File(chooser.getSelectedFile().getAbsolutePath()))) {
+                                    found = true;
+                                    System.out.println(plugTest.getName());
+                                    try {
+                                        plugTest.decode(tmp, new File(chooser.getSelectedFile().getAbsolutePath()), null);
+
+                                        arrayList = (ArrayList) ((Serializer)jcd.getSelectedItem()).deSerialize(tmp.getPath());
+                                        tmp.deleteOnExit();
+                                        objectList.updateUI();
+                                        objectList.revalidate();
+                                        objectList.repaint();
+                                        repaint();
+                                        objectList.clearSelection();
+
+                                        break;
+                                    } catch (IOException e) {
+                                        JOptionPane.showMessageDialog(null, e.getMessage(), e.getClass().toString(), JOptionPane.ERROR_MESSAGE);
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                            if(!found)
+                            {
+                                JOptionPane.showMessageDialog(null, "no plugin found!","Error!", JOptionPane.ERROR_MESSAGE);
+                            }
+
                         }
 
 
-                    } catch (IOException | ClassNotFoundException e) {
+                    } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
 
@@ -251,8 +357,32 @@ public class Form extends JFrame {
         });
     }
 
+    private void create() {
+        String s = JOptionPane.showInputDialog("Enter classname");
+
+        try {
+
+            Class clazz = Class.forName("myArchitecture." + s);
+            Object object = myPanel.createObject(clazz);
+
+            arrayList.add(object);
+            objectList.updateUI();
+            objectList.revalidate();
+            objectList.repaint();
+
+
+        } catch (ClassNotFoundException ex) {
+            JOptionPane.showMessageDialog(null,"Class not found!");
+//                    ex.printStackTrace();
+
+        } catch (IllegalAccessException| InstantiationException | InvocationTargetException ex) {
+            JOptionPane.showMessageDialog(null,"Constructor exception!");
+//                    ex.printStackTrace();
+        }
+    }
+
     public void repaintRight() {
-        this.setTitle(myPanel.currentEditable.toString()+" ("+String.valueOf(myPanel.currentEditable.getClass())+")");
+        this.setTitle(myPanel.currentEditable.toString()+" ("+ myPanel.currentEditable.getClass() +")");
 
         rightPanel.removeAll();
         rightPanel.setBackground(Color.red); //means bad situations
@@ -267,4 +397,6 @@ public class Form extends JFrame {
             for (Serializer s :loader ) { serializers.add(s); }
         return  serializers;
         }
+
+
 }

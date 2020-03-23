@@ -15,16 +15,16 @@ public class textSerializer implements Serializer {
     private FileReader fileReader;
     private Scanner scanner;
 
-    public static Field[] getAllFields(Object object) {
+    private static Field[] getAllFields(Object object) {
         int a = 5;
-        ArrayList<Field> fields = new ArrayList<Field>();
+        ArrayList<Field> fields = new ArrayList<>();
         Class clazz = object.getClass();
         while (clazz != Object.class) {
             fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();
         }
         fields.forEach(field -> field.setAccessible(true));
-        return (Field[]) fields.toArray(new Field[fields.size()]);
+        return fields.toArray(new Field[fields.size()]);
 
     }
 
@@ -84,6 +84,11 @@ public class textSerializer implements Serializer {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "textSerializer{}";
+    }
+
     private String[] objToString(Object object, int lvl, String fieldStr) throws IOException {
         char[] repeat = new char[lvl];
         //  Arrays.fill(repeat, ' ');
@@ -99,27 +104,27 @@ public class textSerializer implements Serializer {
             {  repeat = new char[lvl];
                 Arrays.fill(repeat, ' ');
                 //System.out.print(new String(repeat)+field.getName()+':');
-                fileWriter.write(new String(repeat) + '<' + String.valueOf(object.getClass().getName()) + '>' + '\n');
+                fileWriter.write(new String(repeat) + '<' + object.getClass().getName() + '>' + '\n');
                 lvl++;
                 for (Object o : ((Collection<?>) object)) {
                     repeat = new char[lvl];
                     Arrays.fill(repeat, ' ');
                     //System.out.print(new String(repeat)+field.getName()+':');
-                    fileWriter.write(new String(repeat) + '{' + String.valueOf(o.getClass().getName()) + '}' + '\n');
+                    fileWriter.write(new String(repeat) + '{' + o.getClass().getName() + '}' + '\n');
                    // lvl++;
                     objToString(o, lvl +1, "???");
                     //lvl--;
                     repeat = new char[lvl];
                     Arrays.fill(repeat, ' ');
                     //System.out.print(new String(repeat)+field.getName()+':');
-                    fileWriter.write(new String(repeat) + '{' + String.valueOf(o.getClass().getName()) + '}' + '\n');
+                    fileWriter.write(new String(repeat) + '{' +o.getClass().getName() + '}' + '\n');
 
                 }
                 lvl--;
                 repeat = new char[lvl];
                 Arrays.fill(repeat, ' ');
                 //System.out.print(new String(repeat)+field.getName()+':');
-                fileWriter.write(new String(repeat) + '<' + String.valueOf(object.getClass().getName()) + '>' + '\n');
+                fileWriter.write(new String(repeat) + '<' + object.getClass().getName() + '>' + '\n');
 
             }else
             for (Field field : getAllFields(object)) {
@@ -128,7 +133,7 @@ public class textSerializer implements Serializer {
                 repeat = new char[lvl];
                 Arrays.fill(repeat, ' ');
                 //System.out.print(new String(repeat)+field.getName()+':');
-                fileWriter.write(new String(repeat) + '{' + String.valueOf(field.getType().getName()) + '}' + '\n');
+                fileWriter.write(new String(repeat) + '{' + field.getType().getName() + '}' + '\n');
                 lvl++;
 
                 if (isWrapperType(field.getType())) {
@@ -164,13 +169,13 @@ public class textSerializer implements Serializer {
                                 repeat = new char[lvl + 1];
                                 Arrays.fill(repeat, ' ');
 
-                                fileWriter.write(new String(repeat) + '(' + String.valueOf(i) + ')' + '\n');
+                                fileWriter.write(new String(repeat) + '(' + i + ')' + '\n');
 
                                 if (fi != null) {
                                     repeat = new char[lvl + 1];
                                     Arrays.fill(repeat, ' ');
                                     //System.out.print(new String(repeat)+field.getName()+':');
-                                    fileWriter.write(new String(repeat) + '{' + String.valueOf(fi.getClass().getName()) + '}' + '\n');
+                                    fileWriter.write(new String(repeat) + '{' + fi.getClass().getName() + '}' + '\n');
                                 }
 
                                 objToString(fi, lvl + 2, String.valueOf(i));
@@ -179,12 +184,12 @@ public class textSerializer implements Serializer {
                                     repeat = new char[lvl + 1];
                                     Arrays.fill(repeat, ' ');
                                     //System.out.print(new String(repeat)+field.getName()+':');
-                                    fileWriter.write(new String(repeat) + '{' + String.valueOf(fi.getClass().getName()) + '}' + '\n');
+                                    fileWriter.write(new String(repeat) + '{' + fi.getClass().getName() + '}' + '\n');
                                 }
 
                                 repeat = new char[lvl + 1];
                                 Arrays.fill(repeat, ' ');
-                                fileWriter.write(new String(repeat) + '(' + String.valueOf(i++) + ')' + '\n');
+                                fileWriter.write(new String(repeat) + '(' + i++ + ')' + '\n');
                             }
                         } else {
 
@@ -217,7 +222,7 @@ public class textSerializer implements Serializer {
                 repeat = new char[lvl];
                 Arrays.fill(repeat, ' ');
                 //System.out.print(new String(repeat)+field.getName()+':');
-                fileWriter.write(new String(repeat) + '{' + String.valueOf(field.getType().getName()) + '}' + '\n');
+                fileWriter.write(new String(repeat) + '{' + field.getType().getName() + '}' + '\n');
 
             }
 
@@ -319,7 +324,7 @@ public class textSerializer implements Serializer {
 //            {
 //                field.setAccessible(true);
 //            //    field.set(ret,linesToObj());
-//                //TODO::AAAAA
+//                //TODO::something
 //            }
 
             recursiveInit(ret,depth+1,getClose(scope.get(0)));
@@ -436,12 +441,12 @@ public class textSerializer implements Serializer {
         {
             field.setAccessible(true);
             //    field.set(ret,linesToObj());
-            //TODO::AAAAA
+            //TODO::i've rly forgot)
 
 
 
             int j=0;
-      for(;0!=mslslist2.get(j).get(0).varClass.compareTo(field.getName().toString());j++)
+      for(; 0!=mslslist2.get(j).get(0).varClass.compareTo(field.getName()); j++)
       {
 
       }
@@ -538,7 +543,7 @@ public class textSerializer implements Serializer {
 
 
         return generated;
-    };
+    }
 
     private ArrayList<MySmartTextLine> getHeaders(ArrayList<MySmartTextLine> scope,int depth)
     {
@@ -558,9 +563,9 @@ public class textSerializer implements Serializer {
         @Override
         public int compare(Constructor<?> o1, Constructor<?> o2) {
 
-        int c1=0;
+        int c1;
         c1=o1.getParameterCount();
-        int c2=0;
+        int c2;
             c2=o2.getParameterCount();
             return Integer.compare(c1,c2);
         }
@@ -593,9 +598,9 @@ public class textSerializer implements Serializer {
         public static int count=0;
         public String line;
         public String inLine;
-        public int spaces = 0;
+        public int spaces;
 
-        ;
+
         public String varClass = "";
         Type type = Type.Variable;
         public MySmartTextLine(String line, String inLine, int spaces) {

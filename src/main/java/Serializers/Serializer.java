@@ -5,8 +5,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public interface Serializer {
-    public String getName();
-    public FileNameExtensionFilter getFilter();
-    public boolean serialize(Object object, String pathname) throws IOException;
-    public Object deSerialize(String pathname) throws IOException, ClassNotFoundException;
+     String getName();
+     FileNameExtensionFilter getFilter();
+     boolean serialize(Object object, String pathname) throws IOException;
+     Object deSerialize(String pathname) throws IOException, ClassNotFoundException;
+
 }

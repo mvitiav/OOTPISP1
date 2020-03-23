@@ -1,5 +1,3 @@
-import myArchitecture.Garage;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -11,16 +9,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 
-public class myPanel {
+ class myPanel {
     private static String stringOwner="";
 
-    public static Object currentEditable;
+     static Object currentEditable;
 
-    public static Object createObject(Class clazz) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+     static Object createObject(Class clazz) throws InvocationTargetException, InstantiationException, IllegalAccessException {
 
-        Object object =null;
+        Object object;
 
-        if ((clazz==Integer.class)||(clazz==Byte.class)||(clazz==byte.class)||(clazz==Integer.class)||(clazz==int.class)||(clazz==Double.class)||(clazz==double.class)||(clazz==float.class)||(clazz==char.class))
+        if ((clazz==Byte.class)||(clazz==byte.class)||(clazz==Integer.class)||(clazz==int.class)||(clazz==Double.class)||(clazz==double.class)||(clazz==float.class)||(clazz==char.class))
         {
             return 0;
         }
@@ -32,6 +30,7 @@ public class myPanel {
         {
             return stringOwner;
         }
+
 
 
         Constructor constructor=null;
@@ -68,7 +67,7 @@ public class myPanel {
             fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
             clazz = clazz.getSuperclass();
         }
-        return ( Field[])fields.toArray(new Field[fields.size()]);
+        return fields.toArray(new Field[fields.size()]);
 
 
 
